@@ -1,6 +1,6 @@
 {
   "name": "bmr-portal",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Veeam BMR 관리 콘솔 (로컬 웹서버)",
   "main": "server.js",
   "scripts": {

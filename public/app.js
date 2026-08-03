@@ -52,13 +52,15 @@ function render() {
       <td class="col-check">
         <input type="checkbox" class="chk" data-id="${s.id}" ${selected.has(s.id) ? 'checked' : ''} />
       </td>
-      <td class="col-name">
+      <td class="col-env">
         <span class="env-badge ${esc(s.env)}">${esc(s.env || '-')}</span>
+      </td>
+      <td class="col-name">
         <span class="srv-name" data-editname="${s.id}" title="클릭하여 변경">${esc(s.name)}</span>
       </td>
       <td><span class="mono">${esc(s.ip || '-')}</span></td>
       <td>${esc(s.os || '-')}</td>
-      <td>${esc(s.location || '-')}</td>
+      <td class="col-loc">${esc(s.location || '-')}</td>
       <td class="col-note">
         <div class="note-cell">
           ${s.note ? `<span class="note-text">${esc(s.note)}</span>` : ''}

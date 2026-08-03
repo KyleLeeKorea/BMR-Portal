@@ -121,6 +121,12 @@ body {
 .grid tbody tr:hover { background: #fbfdfb; }
 .col-check { width: 96px; }
 .col-note { width: 340px; }
+/* BMR·구분·서버명·위치 컬럼 가운데 정렬 (헤더 + 행) */
+.grid th.col-check, .grid td.col-check,
+.grid th.col-env, .grid td.col-env,
+.grid th.col-name, .grid td.col-name,
+.grid th.col-loc, .grid td.col-loc { text-align: center; }
+.col-env { width: 80px; }
 .note-cell { display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
 .note-cell .btn-group { display: flex; align-items: center; gap: 8px; }
 
@@ -130,8 +136,10 @@ body {
   cursor: pointer;
 }
 .env-badge {
-  display: inline-block; font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 5px; margin-right: 8px;
+  display: inline-flex; justify-content: center;
+  min-width: 40px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 5px;
   background: var(--veeam-green-soft); color: var(--veeam-green-dark);
 }
 .env-badge.개발 { background: #eef2ff; color: #4338ca; }
