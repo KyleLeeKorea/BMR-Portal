@@ -3,6 +3,14 @@
 Node.js 로컬 웹서버 기반 BMR(Bare Metal Recovery) 관리 콘솔입니다.
 **외부 의존성이 없습니다** — Node 내장 모듈만 사용하므로 `npm install` 이 필요 없습니다.
 
+## 화면
+
+### 메인 — BMR 대상 서버 목록
+![메인 화면](docs/main.png)
+
+### 원격 BMR 수행 팝업 (Veeam Recovery Media)
+![원격 BMR 수행 팝업](docs/bmr-popup.png)
+
 ## 폴더 구조
 ```
 BMR Portal/
@@ -10,10 +18,13 @@ BMR Portal/
 ├─ package.json
 ├─ json/
 │  └─ servers.json     # 서버 데이터 (JSON 저장소)
-└─ public/
-   ├─ index.html
-   ├─ styles.css       # Veeam 브랜드(그린) 톤 UI
-   └─ app.js
+├─ public/
+│  ├─ index.html
+│  ├─ styles.css       # Veeam 브랜드(그린) 톤 UI
+│  └─ app.js
+└─ docs/               # README 캡처 이미지
+   ├─ main.png
+   └─ bmr-popup.png
 ```
 
 ## 실행 방법
