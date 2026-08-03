@@ -1,0 +1,12 @@
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# 로그
+*.log

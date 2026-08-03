@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veeam BMR 관리 콘솔</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2300B336'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EV%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- 상단 헤더 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">V</span>
+      <span class="brand-name">Veeam</span>
+      <span class="brand-sub">BMR 관리 콘솔</span>
+    </div>
+    <nav class="topnav">
+      <button class="nav-btn" data-action="add">＋ 서버 등록</button>
+      <button class="nav-btn" data-action="edit">✎ 서버 변경</button>
+      <button class="nav-btn danger" data-action="delete">🗑 서버 삭제</button>
+    </nav>
+  </header>
+
+  <!-- 본문 -->
+  <main class="container">
+    <div class="page-head">
+      <h1>Bare Metal Recovery 대상 서버</h1>
+      <p class="page-desc">복구 대상 서버 목록입니다. 좌측 체크박스로 BMR 대상을 선택하고, <b>원격 BMR 수행</b> 버튼으로 복구 미디어를 실행합니다.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span class="count-badge">총 <b id="totalCount">0</b>대</span>
+        <span class="count-badge selected">선택 <b id="selectedCount">0</b>대</span>
+      </div>
+      <div class="toolbar-right">
+        <input id="searchBox" class="search" type="text" placeholder="서버명 · IP · OS 검색…" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="grid" id="serverTable">
+        <thead>
+          <tr>
+            <th class="col-check">BMR 구분</th>
+            <th class="col-name">서버명</th>
+            <th class="col-ip">IP</th>
+            <th class="col-os">OS</th>
+            <th class="col-loc">위치</th>
+            <th class="col-note">비고</th>
+          </tr>
+        </thead>
+        <tbody id="serverBody"><!-- rows injected --></tbody>
+      </table>
+      <div id="emptyState" class="empty hidden">
+        등록된 서버가 없습니다. 상단 <b>＋ 서버 등록</b> 버튼으로 추가하세요.
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ 등록/변경 모달 ============ -->
+  <div class="modal-overlay hidden" id="formModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="formTitle">서버 등록</h2>
+        <button class="modal-close" data-close="formModal">✕</button>
+      </div>
+      <form id="serverForm" class="modal-body form">
+        <input type="hidden" id="f_id" />
+        <div class="field">
+          <label>구분</label>
+          <select id="f_env">
+            <option value="운영">운영</option>
+            <option value="개발">개발</option>
+            <option value="DR">DR</option>
+            <option value="테스트">테스트</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>서버명 <span class="req">*</span></label>
+          <input type="text" id="f_name" placeholder="예: 내부포털Web" required />
+        </div>
+        <div class="field">
+          <label>IP</label>
+          <input type="text" id="f_ip" placeholder="예: 10.10.1.12" />
+        </div>
+        <div class="field">
+          <label>OS</label>
+          <input type="text" id="f_os" placeholder="예: Rocky 8.10" />
+        </div>
+        <div class="field">
+          <label>위치</label>
+          <input type="text" id="f_location" placeholder="예: DC1" />
+        </div>
+        <div class="field full">
+          <label>비고</label>
+          <input type="text" id="f_note" placeholder="메모 (선택)" />
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn ghost" data-close="formModal">취소</button>
+          <button type="submit" class="btn primary" id="formSubmit">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ 삭제 선택 모달 ============ -->
+  <div class="modal-overlay hidden" id="deleteModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>서버 삭제</h2>
+        <button class="modal-close" data-close="deleteModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-note">삭제할 서버를 선택하세요. 이 작업은 되돌릴 수 없습니다.</p>
+        <ul class="pick-list" id="deleteList"></ul>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-close="deleteModal">취소</button>
+        <button type="button" class="btn danger" id="deleteConfirm">선택 삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 변경 선택 모달 (어떤 서버를 변경할지) ============ -->
+  <div class="modal-overlay hidden" id="pickEditModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>변경할 서버 선택</h2>
+        <button class="modal-close" data-close="pickEditModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul class="pick-list" id="editPickList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 원격 BMR 수행 모달 ============ -->
+  <div class="modal-overlay hidden" id="bmrModal">
+    <div class="modal bmr">
+      <div class="modal-head">
+        <h2>원격 BMR 수행 — Veeam Recovery Media</h2>
+        <button class="modal-close" data-close="bmrModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 서버 정보 요약 -->
+        <div class="server-summary" id="bmrSummary"></div>
+
+        <!-- 첨부 이미지: Veeam Recovery Media 부팅 화면 재현 -->
+        <div class="recovery-screen" id="recoveryScreen">
+          <div class="rec-titlebar">Veeam Recovery Media</div>
+          <div class="rec-menu">
+            <div class="rec-menu-title">MAIN MENU</div>
+            <ul class="rec-list">
+              <li class="active" data-opt="restore-volumes">Restore volumes</li>
+              <li data-opt="restore-files">Restore files</li>
+              <li data-opt="configure-network">Configure network</li>
+              <li data-opt="switch-cli">Switch to command line</li>
+              <li data-opt="reboot">Reboot</li>
+              <li data-opt="shutdown">Shutdown</li>
+            </ul>
+          </div>
+          <div class="rec-footer">
+            <span><b class="key">Enter</b> <span class="hl">Select</span></span>
+            <span><b class="key">Up,Down</b> <span class="hl">Navigate</span></span>
+          </div>
+        </div>
+        <p class="rec-hint">↑ / ↓ 로 항목 이동, <b>Enter</b> 로 선택 (시뮬레이션)</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-close="bmrModal">닫기</button>
+        <button type="button" class="btn primary" id="bmrExecute">Enter — 선택 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 명령어(스크립트) 편집 모달 ============ -->
+  <div class="modal-overlay hidden" id="scriptModal">
+    <div class="modal script">
+      <div class="modal-head">
+        <h2>명령어 편집 — <span id="scriptServerName"></span></h2>
+        <button class="modal-close" data-close="scriptModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-note">이 서버의 <b>원격 BMR 수행</b> 시 실행할 스크립트/명령어를 입력하세요.</p>
+        <input type="hidden" id="s_id" />
+        <textarea id="s_script" class="code-editor" spellcheck="false"
+          placeholder="#!/bin/bash&#10;# 예) 복구 전 사전 점검 및 BMR 트리거&#10;veeamconfig ..."></textarea>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-close="scriptModal">취소</button>
+        <button type="button" class="btn primary" id="scriptSave">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토스트 -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

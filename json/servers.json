@@ -1,0 +1,29 @@
+[
+  {
+    "id": "srv-1001",
+    "env": "운영",
+    "name": "내부포털Web",
+    "ip": "10.10.1.12",
+    "os": "Rocky 8.10",
+    "location": "DC1",
+    "note": ""
+  },
+  {
+    "id": "srv-1002",
+    "env": "운영",
+    "name": "DB마스터",
+    "ip": "10.10.1.20",
+    "os": "Rocky 9.4",
+    "location": "DC1",
+    "note": "야간 백업"
+  },
+  {
+    "id": "srv-1003",
+    "env": "개발",
+    "name": "테스트App",
+    "ip": "10.20.3.51",
+    "os": "Ubuntu 22.04",
+    "location": "DC2",
+    "note": ""
+  }
+]
